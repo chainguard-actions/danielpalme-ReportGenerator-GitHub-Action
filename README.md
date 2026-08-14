@@ -1,0 +1,1 @@
+# danielpalme-ReportGenerator-GitHub-Action
