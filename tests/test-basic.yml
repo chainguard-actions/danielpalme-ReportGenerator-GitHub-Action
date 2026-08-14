@@ -1,0 +1,57 @@
+name: Test basic usage - HTML and Cobertura report generation
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install .NET SDK
+        run: |
+          wget -q https://dot.net/v1/dotnet-install.sh -O /tmp/dotnet-install.sh
+          chmod +x /tmp/dotnet-install.sh
+          /tmp/dotnet-install.sh --channel 8.0 --install-dir "$HOME/.dotnet"
+          echo "$HOME/.dotnet" >> $GITHUB_PATH
+          echo "DOTNET_ROOT=$HOME/.dotnet" >> $GITHUB_ENV
+
+      - name: Copy fixture coverage file
+        run: cp "$GITHUB_WORKSPACE/tests/fixtures/coverage.xml" "$GITHUB_WORKSPACE/coverage.xml"
+
+      - id: action
+        uses: .
+        with:
+          reports: coverage.xml
+          targetdir: coveragereport
+          reporttypes: HtmlInline;Cobertura
+          verbosity: Info
+
+      - name: Assert report directory was created
+        run: |
+          echo "Checking coveragereport directory..."
+          if [ ! -d "$GITHUB_WORKSPACE/coveragereport" ]; then
+            echo "FAIL: coveragereport directory was not created"
+            exit 1
+          fi
+          echo "PASS: coveragereport directory exists"
+
+      - name: Assert HTML report was generated
+        run: |
+          echo "Checking for HTML report files..."
+          HTML_COUNT=$(find "$GITHUB_WORKSPACE/coveragereport" -name "*.html" | wc -l)
+          echo "Found $HTML_COUNT HTML files"
+          if [ "$HTML_COUNT" -eq 0 ]; then
+            echo "FAIL: No HTML files found in coveragereport"
+            exit 1
+          fi
+          echo "PASS: HTML report files found"
+
+      - name: Assert Cobertura report was generated
+        run: |
+          echo "Checking for Cobertura report..."
+          if [ ! -f "$GITHUB_WORKSPACE/coveragereport/Cobertura.xml" ]; then
+            echo "FAIL: Cobertura.xml not found in coveragereport"
+            ls -la "$GITHUB_WORKSPACE/coveragereport/" || true
+            exit 1
+          fi
+          echo "PASS: Cobertura.xml report found"

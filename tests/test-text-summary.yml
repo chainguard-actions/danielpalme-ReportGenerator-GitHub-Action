@@ -1,0 +1,61 @@
+name: Test TextSummary report type
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install .NET SDK
+        run: |
+          wget -q https://dot.net/v1/dotnet-install.sh -O /tmp/dotnet-install.sh
+          chmod +x /tmp/dotnet-install.sh
+          /tmp/dotnet-install.sh --channel 8.0 --install-dir "$HOME/.dotnet"
+          echo "$HOME/.dotnet" >> $GITHUB_PATH
+          echo "DOTNET_ROOT=$HOME/.dotnet" >> $GITHUB_ENV
+
+      - name: Copy fixture coverage file
+        run: cp "$GITHUB_WORKSPACE/tests/fixtures/coverage.xml" "$GITHUB_WORKSPACE/coverage.xml"
+
+      - id: action
+        uses: .
+        with:
+          reports: coverage.xml
+          targetdir: textsummaryreport
+          reporttypes: TextSummary
+          verbosity: Info
+          title: 'Test Coverage Report'
+          tag: 'test-build-1'
+
+      - name: Assert report directory was created
+        run: |
+          echo "Checking textsummaryreport directory..."
+          if [ ! -d "$GITHUB_WORKSPACE/textsummaryreport" ]; then
+            echo "FAIL: textsummaryreport directory was not created"
+            exit 1
+          fi
+          echo "PASS: textsummaryreport directory exists"
+
+      - name: Assert TextSummary report was generated
+        run: |
+          echo "Checking for Summary.txt report..."
+          if [ ! -f "$GITHUB_WORKSPACE/textsummaryreport/Summary.txt" ]; then
+            echo "FAIL: Summary.txt not found in textsummaryreport"
+            ls -la "$GITHUB_WORKSPACE/textsummaryreport/" || true
+            exit 1
+          fi
+          echo "PASS: Summary.txt report found"
+          echo "--- Summary.txt content ---"
+          cat "$GITHUB_WORKSPACE/textsummaryreport/Summary.txt"
+
+      - name: Assert summary contains coverage data
+        run: |
+          echo "Checking Summary.txt content..."
+          CONTENT=$(cat "$GITHUB_WORKSPACE/textsummaryreport/Summary.txt")
+          echo "Content: $CONTENT"
+          if ! echo "$CONTENT" | grep -qi "coverage"; then
+            echo "FAIL: Summary.txt does not contain coverage information"
+            exit 1
+          fi
+          echo "PASS: Summary.txt contains coverage information"

@@ -1,0 +1,72 @@
+name: Test JsonSummary report type with custom toolpath
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install .NET SDK
+        run: |
+          wget -q https://dot.net/v1/dotnet-install.sh -O /tmp/dotnet-install.sh
+          chmod +x /tmp/dotnet-install.sh
+          /tmp/dotnet-install.sh --channel 8.0 --install-dir "$HOME/.dotnet"
+          echo "$HOME/.dotnet" >> $GITHUB_PATH
+          echo "DOTNET_ROOT=$HOME/.dotnet" >> $GITHUB_ENV
+
+      - name: Copy fixture coverage file
+        run: cp "$GITHUB_WORKSPACE/tests/fixtures/coverage.xml" "$GITHUB_WORKSPACE/coverage.xml"
+
+      - id: action
+        uses: .
+        with:
+          reports: coverage.xml
+          targetdir: jsonsummaryreport
+          reporttypes: JsonSummary
+          verbosity: Info
+          toolpath: customtoolpath
+
+      - name: Assert custom toolpath was used
+        run: |
+          echo "Checking custom toolpath directory..."
+          if [ ! -d "$GITHUB_WORKSPACE/customtoolpath" ]; then
+            echo "FAIL: customtoolpath directory was not created"
+            exit 1
+          fi
+          echo "PASS: customtoolpath directory exists"
+          ls -la "$GITHUB_WORKSPACE/customtoolpath/"
+
+      - name: Assert report directory was created
+        run: |
+          echo "Checking jsonsummaryreport directory..."
+          if [ ! -d "$GITHUB_WORKSPACE/jsonsummaryreport" ]; then
+            echo "FAIL: jsonsummaryreport directory was not created"
+            exit 1
+          fi
+          echo "PASS: jsonsummaryreport directory exists"
+
+      - name: Assert JsonSummary report was generated
+        run: |
+          echo "Checking for Summary.json report..."
+          if [ ! -f "$GITHUB_WORKSPACE/jsonsummaryreport/Summary.json" ]; then
+            echo "FAIL: Summary.json not found in jsonsummaryreport"
+            ls -la "$GITHUB_WORKSPACE/jsonsummaryreport/" || true
+            exit 1
+          fi
+          echo "PASS: Summary.json report found"
+          echo "--- Summary.json content ---"
+          cat "$GITHUB_WORKSPACE/jsonsummaryreport/Summary.json"
+
+      - name: Assert JSON is valid and contains coverage data
+        run: |
+          echo "Validating Summary.json..."
+          CONTENT=$(cat "$GITHUB_WORKSPACE/jsonsummaryreport/Summary.json")
+          echo "Content: $CONTENT"
+          # Check it's valid JSON (starts with '{' or '[')
+          FIRST_CHAR=$(echo "$CONTENT" | tr -d '[:space:]' | cut -c1)
+          if [ "$FIRST_CHAR" != "{" ] && [ "$FIRST_CHAR" != "[" ]; then
+            echo "FAIL: Summary.json does not appear to be valid JSON"
+            exit 1
+          fi
+          echo "PASS: Summary.json is valid JSON"

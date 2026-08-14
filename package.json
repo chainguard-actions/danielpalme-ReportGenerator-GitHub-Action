@@ -1,0 +1,27 @@
+{
+  "name": "ReportGenerator",
+  "version": "5.2.2",
+  "description": "",
+  "main": "lib/reportgenerator.js",
+  "scripts": {
+    "build": "tsc && ncc build"
+  },
+  "keywords": [
+    "code-coverage",
+    "testing",
+    "tdd-utilities",
+    "reporting",
+    "dotnet-core"
+  ],
+  "author": "danielpalme",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@actions/core": "^1.10.1",
+    "@actions/exec": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.9.0",
+    "@vercel/ncc": "^0.38.1",
+    "typescript": "^5.2.2"
+  }
+}

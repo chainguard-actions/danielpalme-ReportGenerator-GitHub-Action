@@ -1,0 +1,61 @@
+name: Test assembly and class filters
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install .NET SDK
+        run: |
+          wget -q https://dot.net/v1/dotnet-install.sh -O /tmp/dotnet-install.sh
+          chmod +x /tmp/dotnet-install.sh
+          /tmp/dotnet-install.sh --channel 8.0 --install-dir "$HOME/.dotnet"
+          echo "$HOME/.dotnet" >> $GITHUB_PATH
+          echo "DOTNET_ROOT=$HOME/.dotnet" >> $GITHUB_ENV
+
+      - name: Copy fixture coverage file
+        run: cp "$GITHUB_WORKSPACE/tests/fixtures/coverage.xml" "$GITHUB_WORKSPACE/coverage.xml"
+
+      - id: action
+        uses: .
+        with:
+          reports: coverage.xml
+          targetdir: filteredreport
+          reporttypes: TextSummary
+          verbosity: Info
+          assemblyfilters: '+MyProject'
+          classfilters: '+MyProject.Calculator'
+          filefilters: '+*'
+
+      - name: Assert report directory was created
+        run: |
+          echo "Checking filteredreport directory..."
+          if [ ! -d "$GITHUB_WORKSPACE/filteredreport" ]; then
+            echo "FAIL: filteredreport directory was not created"
+            exit 1
+          fi
+          echo "PASS: filteredreport directory exists"
+
+      - name: Assert TextSummary report was generated with filters applied
+        run: |
+          echo "Checking for Summary.txt report..."
+          if [ ! -f "$GITHUB_WORKSPACE/filteredreport/Summary.txt" ]; then
+            echo "FAIL: Summary.txt not found in filteredreport"
+            ls -la "$GITHUB_WORKSPACE/filteredreport/" || true
+            exit 1
+          fi
+          echo "PASS: Summary.txt report found"
+          echo "--- Summary.txt content ---"
+          cat "$GITHUB_WORKSPACE/filteredreport/Summary.txt"
+
+      - name: Assert filtered summary contains expected class
+        run: |
+          CONTENT=$(cat "$GITHUB_WORKSPACE/filteredreport/Summary.txt")
+          echo "Content: $CONTENT"
+          if ! echo "$CONTENT" | grep -qi "Calculator"; then
+            echo "FAIL: Summary.txt does not contain Calculator class (filter may not have worked)"
+            exit 1
+          fi
+          echo "PASS: Summary.txt contains Calculator class as expected"
