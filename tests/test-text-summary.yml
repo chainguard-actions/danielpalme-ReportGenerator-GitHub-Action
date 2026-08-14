@@ -1,0 +1,48 @@
+name: Test TextSummary report type
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          dotnet-version: '8.x'
+
+      - name: Copy coverage fixture into workspace
+        run: |
+          cp "$GITHUB_WORKSPACE/tests/fixtures/coverage.xml" "$GITHUB_WORKSPACE/coverage.xml"
+
+      - id: action
+        uses: .
+        with:
+          reports: 'coverage.xml'
+          targetdir: 'textreport'
+          reporttypes: 'TextSummary'
+          verbosity: 'Info'
+          title: 'MyProject Coverage'
+          tag: 'test-run-1'
+
+      - name: Assert text summary report was generated
+        run: |
+          echo "Checking for TextSummary report..."
+          if [ ! -f "$GITHUB_WORKSPACE/textreport/Summary.txt" ]; then
+            echo "FAIL: Summary.txt not found in textreport/"
+            ls -la "$GITHUB_WORKSPACE/textreport/" || true
+            exit 1
+          fi
+          echo "PASS: Summary.txt found"
+
+      - name: Assert text summary contains coverage data
+        run: |
+          echo "Checking Summary.txt content..."
+          CONTENT=$(cat "$GITHUB_WORKSPACE/textreport/Summary.txt")
+          echo "Content: $CONTENT"
+          if [ -z "$CONTENT" ]; then
+            echo "FAIL: Summary.txt is empty"
+            exit 1
+          fi
+          echo "PASS: Summary.txt has content"

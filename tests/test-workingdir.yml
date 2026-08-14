@@ -1,0 +1,49 @@
+name: Test workingdir input - relative paths resolved from working directory
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          dotnet-version: '8.x'
+
+      - name: Set up working directory with coverage file
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/myproject"
+          cp "$GITHUB_WORKSPACE/tests/fixtures/coverage.xml" "$GITHUB_WORKSPACE/myproject/coverage.xml"
+
+      - id: action
+        uses: .
+        with:
+          reports: 'coverage.xml'
+          targetdir: 'output'
+          reporttypes: 'TextSummary'
+          workingdir: '${{ github.workspace }}/myproject'
+          verbosity: 'Info'
+
+      - name: Assert report was generated in workingdir-relative targetdir
+        run: |
+          echo "Checking for report in workingdir-relative output directory..."
+          EXPECTED_DIR="$GITHUB_WORKSPACE/myproject/output"
+          if [ ! -d "$EXPECTED_DIR" ]; then
+            echo "FAIL: Expected output directory '$EXPECTED_DIR' was not created"
+            ls -la "$GITHUB_WORKSPACE/myproject/" || true
+            exit 1
+          fi
+          echo "PASS: Output directory exists at $EXPECTED_DIR"
+
+      - name: Assert TextSummary was generated in workingdir output
+        run: |
+          EXPECTED_FILE="$GITHUB_WORKSPACE/myproject/output/Summary.txt"
+          echo "Checking for $EXPECTED_FILE..."
+          if [ ! -f "$EXPECTED_FILE" ]; then
+            echo "FAIL: Summary.txt not found at $EXPECTED_FILE"
+            ls -la "$GITHUB_WORKSPACE/myproject/output/" || true
+            exit 1
+          fi
+          echo "PASS: Summary.txt found at expected location"
