@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<coverage line-rate="0.75" branch-rate="1" lines-covered="3" lines-valid="4" branches-covered="0" branches-valid="0" complexity="2" version="1.9" timestamp="1700000000">
+  <sources>
+    <source>/src</source>
+  </sources>
+  <packages>
+    <package name="SampleAssembly" line-rate="0.75" branch-rate="1" complexity="2">
+      <classes>
+        <class name="Sample.Calculator" filename="Calculator.cs" line-rate="1" branch-rate="1" complexity="1">
+          <methods>
+            <method name="Add" signature="(System.Int32,System.Int32)" line-rate="1" branch-rate="1" complexity="1">
+              <lines>
+                <line number="5" hits="1" branch="false" />
+                <line number="6" hits="1" branch="false" />
+              </lines>
+            </method>
+          </methods>
+          <lines>
+            <line number="5" hits="1" branch="false" />
+            <line number="6" hits="1" branch="false" />
+          </lines>
+        </class>
+        <class name="Sample.ExcludedHelper" filename="ExcludedHelper.cs" line-rate="0.5" branch-rate="1" complexity="1">
+          <methods>
+            <method name="Help" signature="()" line-rate="0.5" branch-rate="1" complexity="1">
+              <lines>
+                <line number="3" hits="1" branch="false" />
+                <line number="4" hits="0" branch="false" />
+              </lines>
+            </method>
+          </methods>
+          <lines>
+            <line number="3" hits="1" branch="false" />
+            <line number="4" hits="0" branch="false" />
+          </lines>
+        </class>
+      </classes>
+    </package>
+  </packages>
+</coverage>
