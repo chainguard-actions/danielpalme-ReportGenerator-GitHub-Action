@@ -1,0 +1,42 @@
+name: Test workingdir relative paths
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Ensure .NET SDK is available
+        run: |
+          if command -v dotnet >/dev/null 2>&1 && dotnet --list-sdks | grep -qE '^(8|9|10)\.'; then
+            dotnet --version
+            exit 0
+          fi
+          curl -sSL https://dot.net/v1/dotnet-install.sh -o "$RUNNER_TEMP/dotnet-install.sh"
+          bash "$RUNNER_TEMP/dotnet-install.sh" --channel 8.0 --install-dir "$HOME/.dotnet"
+          echo "DOTNET_ROOT=$HOME/.dotnet" >> "$GITHUB_ENV"
+          echo "$HOME/.dotnet" >> "$GITHUB_PATH"
+      - id: action
+        uses: .
+        with:
+          workingdir: tests/fixtures
+          reports: coverage.cobertura.xml
+          targetdir: wd-report
+          reporttypes: Cobertura;TextSummary
+          toolpath: out-wd/tool
+      - name: Assert reports written relative to workingdir
+        run: |
+          ls -la tests/fixtures/wd-report || true
+          if [ ! -f tests/fixtures/wd-report/Summary.txt ]; then
+            echo "FAIL: Summary.txt not under workingdir/targetdir"
+            exit 1
+          fi
+          if [ ! -f tests/fixtures/wd-report/Cobertura.xml ]; then
+            echo "FAIL: Cobertura.xml not under workingdir/targetdir"
+            exit 1
+          fi
+          if [ -d wd-report ]; then
+            echo "FAIL: targetdir was not resolved relative to workingdir"
+            exit 1
+          fi
+          echo "PASS"

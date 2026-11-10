@@ -1,0 +1,46 @@
+name: Test class filters and JSON summary
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Ensure .NET SDK is available
+        run: |
+          if command -v dotnet >/dev/null 2>&1 && dotnet --list-sdks | grep -qE '^(8|9|10)\.'; then
+            dotnet --version
+            exit 0
+          fi
+          curl -sSL https://dot.net/v1/dotnet-install.sh -o "$RUNNER_TEMP/dotnet-install.sh"
+          bash "$RUNNER_TEMP/dotnet-install.sh" --channel 8.0 --install-dir "$HOME/.dotnet"
+          echo "DOTNET_ROOT=$HOME/.dotnet" >> "$GITHUB_ENV"
+          echo "$HOME/.dotnet" >> "$GITHUB_PATH"
+      - id: action
+        uses: .
+        with:
+          reports: tests/fixtures/coverage.cobertura.xml
+          targetdir: out-filters/report
+          reporttypes: TextSummary;JsonSummary
+          toolpath: out-filters/tool
+          classfilters: -MyLib.Helper
+      - name: Assert Helper class excluded
+        run: |
+          cat out-filters/report/Summary.txt
+          if [ ! -f out-filters/report/Summary.json ]; then
+            echo "FAIL: Summary.json not generated"
+            exit 1
+          fi
+          if ! grep -q "MyLib.Calculator" out-filters/report/Summary.txt; then
+            echo "FAIL: Calculator class should be present"
+            exit 1
+          fi
+          if grep -q "MyLib.Helper" out-filters/report/Summary.txt; then
+            echo "FAIL: Helper class should be excluded"
+            exit 1
+          fi
+          if ! grep -qE "Line coverage:\s*75%" out-filters/report/Summary.txt; then
+            echo "FAIL: expected 75% line coverage after filtering"
+            exit 1
+          fi
+          echo "PASS"
