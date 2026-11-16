@@ -4,8 +4,13 @@
   "version": "5.5.11",
   "commit_sha": "d3ebf1f760f7d8ab92cc44d9bcfee7ad73722a31",
   "url": "https://github.com/danielpalme/ReportGenerator-GitHub-Action",
-  "policy_sha": "d636be7e43ef829af6e853da6b3c7566db9f72fe",
+  "policy_sha": "374911c4be584df24e6da57af2d990570ef0f859",
   "test_policy_sha": "843adf9e4b8f85d0c08b27b9d0b09dd094b54702",
   "test_agent_version": "2",
-  "harden_agent_version": "2"
+  "harden_agent_version": "2",
+  "dist_artifact": {
+    "gcs_uri": "gs://patch-actions-node-artifacts/dist-artifacts/danielpalme/ReportGenerator-GitHub-Action/5.5.11/sha256-800508fa2688bd8bd3cbfa7f639ebdda50f3e49c0146c1d5872f8fb87a5e0d61.tar.gz",
+    "sha256": "800508fa2688bd8bd3cbfa7f639ebdda50f3e49c0146c1d5872f8fb87a5e0d61",
+    "size_bytes": 266932
+  }
 }
