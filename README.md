@@ -12,6 +12,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | 5.5.11 | [`5.5.11`](https://github.com/chainguard-actions/danielpalme-ReportGenerator-GitHub-Action/tree/5.5.11) | [`d3ebf1f`](https://github.com/danielpalme/ReportGenerator-GitHub-Action/commit/d3ebf1f760f7d8ab92cc44d9bcfee7ad73722a31) | [`HARDENING.md`](https://github.com/chainguard-actions/danielpalme-ReportGenerator-GitHub-Action/blob/5.5.11/HARDENING.md) |
 | 5.5.12 | [`5.5.12`](https://github.com/chainguard-actions/danielpalme-ReportGenerator-GitHub-Action/tree/5.5.12) | [`8616742`](https://github.com/danielpalme/ReportGenerator-GitHub-Action/commit/861674232075b2c6bd1405a04c4bb9b150653e81) | [`HARDENING.md`](https://github.com/chainguard-actions/danielpalme-ReportGenerator-GitHub-Action/blob/5.5.12/HARDENING.md) |
 | 5.6.0 | [`5.6.0`](https://github.com/chainguard-actions/danielpalme-ReportGenerator-GitHub-Action/tree/5.6.0) | [`5f3701a`](https://github.com/danielpalme/ReportGenerator-GitHub-Action/commit/5f3701a41d14548c9b8e575a5c235230e515cbc0) | [`HARDENING.md`](https://github.com/chainguard-actions/danielpalme-ReportGenerator-GitHub-Action/blob/5.6.0/HARDENING.md) |
+| 5.6.1 | [`5.6.1`](https://github.com/chainguard-actions/danielpalme-ReportGenerator-GitHub-Action/tree/5.6.1) | [`70c37c4`](https://github.com/danielpalme/ReportGenerator-GitHub-Action/commit/70c37c4d588cff5bf9cf190830c6f01dfcfb884b) | [`HARDENING.md`](https://github.com/chainguard-actions/danielpalme-ReportGenerator-GitHub-Action/blob/5.6.1/HARDENING.md) |
 
 ## Privacy
 
